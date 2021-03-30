@@ -182,7 +182,10 @@ public class CriarBD extends javax.swing.JFrame {
     }//GEN-LAST:event_pswPasswordActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:        
+        selecttblVendas();
+        inserindoindexcliente();
+        criarReferenciaTblCliente();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
@@ -351,7 +354,7 @@ public class CriarBD extends javax.swing.JFrame {
         boolean sucesso = true;
         if (criaBanco() == false) {
             sucesso = false;
-        } else if (criaTabela() == false) {
+        } else if (criaTabelas() == false) {
             sucesso = false;
         }
 
@@ -361,7 +364,7 @@ public class CriarBD extends javax.swing.JFrame {
     private boolean criaBanco() {
         boolean sucesso = false;
         PreparedStatement stm;
-        String sql = "CREATE DATABASE IF NOT EXISTS bd_Brt_Vendas";
+        String sql = "CREATE DATABASE IF NOT EXISTS bd_Brt_Vendas CHARACTER SET utf8 COLLATE utf8_general_ci";
 
         try {
             stm = conexao.prepareStatement(sql);
@@ -379,11 +382,15 @@ public class CriarBD extends javax.swing.JFrame {
 
         conexaoDataBase(txtHost.getText(), txtPorta.getText(), txtUser.getText(), pswPassword.getPassword().toString());
 
-        if (CRIA_TABELA_MODELO() == false) {
+        if (criaTabelatblcliente() == false) {
             sucesso = false;
-        } else if (CRIA_TABELA_COR() == false) {
+        } else if (criarTabelatblusuario() == false) {
             sucesso = false;
-        } else if (CRIA_TABELA_CARRO() == false) {
+        } else if (criarTabelatblproduto() == false) {
+            sucesso = false;
+        } else if (criarTabelatblvendas() == false) {
+            sucesso = false;
+        } else if (criarTabelatblvendasprodutos() == false) {
             sucesso = false;
         }
 
@@ -391,6 +398,174 @@ public class CriarBD extends javax.swing.JFrame {
         return sucesso;
     }    
     
+    private boolean criaTabelatblcliente() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "CREATE TABLE  IF NOT EXISTS tbl_cliente ("
+            + " pk_id_cliente BIGINT NOT NULL AUTO_INCREMENT ,"
+            + " cli_nome VARCHAR( 300 ) NOT NULL ,"
+            + " cli_endereco VARCHAR( 350 ) NOT NULL ,"
+            + " cli_bairro VARCHAR( 300 ) NOT NULL ,"
+            + " cli_cidade VARCHAR( 200 ) NOT NULL ,"
+            + " cli_uf VARCHAR( 2 ) NOT NULL ,"
+            + " cli_cep VARCHAR( 9 ) NOT NULL ,"
+            + " cli_telefone VARCHAR( 15 ) NULL ,"
+            + " PRIMARY KEY ( pk_id_cliente ) "
+            + " ) ENGINE = InnoDB";
+                
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+    
+        private boolean criarTabelatblusuario() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "CREATE TABLE  IF NOT EXISTS tbl_usuario ("
+            + " pk_id_usuario BIGINT NOT NULL AUTO_INCREMENT ,"
+            + " usu_nome VARCHAR( 150 ) NOT NULL ,"
+            + " usu_login VARCHAR( 350 ) NOT NULL ,"
+            + " usu_senha VARCHAR( 20 ) NOT NULL ,"
+            + " PRIMARY KEY ( pk_id_usuario ) "
+            + " ) ENGINE = InnoDB";
+
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+        
+    private boolean criarTabelatblproduto() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "CREATE TABLE  IF NOT EXISTS tbl_produto ("
+            + " pk_id_produto BIGINT NOT NULL AUTO_INCREMENT ,"
+            + " pro_nome VARCHAR( 300 ) NOT NULL ,"
+            + " pro_valor DOUBLE NOT NULL ,"
+            + " pro_estoque INT NOT NULL ,"
+            + " PRIMARY KEY ( pk_id_produto ) "
+            + " ) ENGINE = InnoDB";
+        
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+    
+        private boolean criarTabelatblvendas() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "CREATE TABLE  IF NOT EXISTS tbl_vendas ("
+                + " pk_id_vendas BIGINT NOT NULL AUTO_INCREMENT ,"
+                + " fk_cliente BIGINT UNSIGNED NOT NULL , "
+                + " ven_data_venda DATE NOT NULL , "
+                + " ven_valor_liquido DOUBLE NOT NULL , "
+                + " ven_valor_bruto DOUBLE NOT NULL , "
+                + " ven_desconto DOUBLE NOT NULL , "              
+                + " PRIMARY KEY ( pk_id_vendas )"
+                + " ) ENGINE = InnoDB";
+        
+               //+ " ADD INDEX fkcliente ( fk_cliente ), "
+                /*ALTER TABLE `db_concessionaria`.`tbl_vendas` ADD INDEX `fkcliente` (`fk_cliente`);*/
+                //+ " FOREIGN KEY ( fk_cliente ) REFERENCES tbl_cliente( pk_id_cliente ) ON DELETE RESTRICT ON UPDATE RESTRICT,"
+        
+
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+                
+        
+    private boolean criarTabelatblvendasprodutos() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "CREATE TABLE  IF NOT EXISTS tbl_vendas_produtos ("
+            + " pk_id_venda_produto BIGINT NOT NULL AUTO_INCREMENT ,"
+            + " fk_produto BIGINT UNSIGNED NOT NULL , "
+            + " fk_vendas BIGINT UNSIGNED NOT NULL , "
+            + " ven_pro_valor DOUBLE NOT NULL , "
+            + " ven_pro_quantidade INT NOT NULL , "
+            + " PRIMARY KEY ( pk_id_venda_produto ), "
+            + " ) ENGINE = InnoDB";
+        /*ALTER TABLE `db_concessionaria`.`tbl_vendas_produtos` ADD INDEX `fkprodutos` (`fk_produto`);
+        //ALTER TABLE `db_concessionaria`.`tbl_vendas_produtos` ADD INDEX `fkvendas` (`fk_vendas`);*/
+        //+ " FOREIGN KEY (fk_produto) REFERENCES tbl_cliente(pk_id_produto) ON DELETE RESTRICT ON UPDATE RESTRICT,"
+        //+ " FOREIGN KEY (fk_vendas) REFERENCES tbl_vendas(pk_id_vendas) ON DELETE RESTRICT ON UPDATE RESTRICT"
+
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+    
+        private boolean selecttblVendas() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "SELECT * FROM tbl_vendas ";
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+        
+    private boolean inserindoindexcliente() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "ALTER TABLE tbl_vendas ADD INDEX fkcliente ( fk_cliente )";
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+    
+    private boolean criarReferenciaTblCliente() {
+        boolean sucesso = false;
+        PreparedStatement stm;
+        String sql = "ALTER TABLE tbl_vendas ADD FOREIGN KEY (fk_cliente) REFERENCES tbl_cliente ( pk_id_cliente ) ON DELETE RESTRICT ON UPDATE RESTRICT";
+        try {
+            stm = conexao.prepareStatement(sql);
+            stm.execute();
+            sucesso = true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro", 0);
+        }
+        return sucesso;
+    }
+    
+
+  
+        
+
     
 }
 
